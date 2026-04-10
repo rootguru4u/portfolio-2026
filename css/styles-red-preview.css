@@ -4,16 +4,20 @@
   --bg-elevated: #121a24;
   --bg-card: #161f2c;
   --border: rgba(148, 163, 184, 0.12);
-  --text: #f1f5f9;
-  --text-muted: #a8b8cc;
-  --text-subtle: #8b9cb3;
-  --accent: #22d3ee;
-  --accent-dim: rgba(34, 211, 238, 0.15);
-  --accent-strong: #06b6d4;
-  /* Match hero sidebar / red band (#dc2626) — dark, saturated reds */
-  --red: #dc2626;
-  --red-dim: rgba(220, 38, 38, 0.16);
-  --red-strong: #b91c1c;
+  /* Main content typography — cyan-tinted (hero sidetext L/R uses pinned hex — unchanged) */
+  --text: #c9eef7;
+  --text-muted: #7dc4d9;
+  --text-subtle: #52a3ba;
+  /* Slate copy preserved for #contact only */
+  --contact-body-text: #dde8f3;
+  --contact-body-muted: #8ea3bd;
+  --accent: #4fc3f7;
+  --accent-dim: rgba(79, 195, 247, 0.16);
+  --accent-strong: #0ea5e9;
+  /* Emphasis / labels / CTAs outside hero gutters */
+  --red: #f43f5e;
+  --red-dim: rgba(244, 63, 94, 0.14);
+  --red-strong: #e11d48;
   --font-sans: "DM Sans", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --radius: 12px;
@@ -21,7 +25,7 @@
   --shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
   --max: 1100px;
   --narrow: 720px;
-  --header-h: 64px;
+  --header-h: 44px;
   --space-1: 0.5rem;
   --space-2: 1rem;
   --space-3: 1.5rem;
@@ -109,21 +113,35 @@ a:focus-visible {
 }
 
 .nav {
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 0 1.25rem;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 clamp(1.55rem, 5.5vw, 3.15rem);
   height: 100%;
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
+  gap: clamp(1.85rem, 5vw, 4.35rem);
 }
 
 .nav__brand {
+  flex-shrink: 0;
   font-family: var(--font-mono);
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 0.925rem;
   color: var(--text);
   letter-spacing: -0.02em;
+}
+
+/* Toggle + desktop link row — stays flush right */
+.nav__end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .nav__brand:hover {
@@ -134,8 +152,8 @@ a:focus-visible {
 .nav__toggle {
   display: none;
   flex-direction: column;
-  gap: 6px;
-  padding: 0.5rem;
+  gap: 5px;
+  padding: 0.4rem;
   background: transparent;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -156,17 +174,20 @@ a:focus-visible {
   padding: 0;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  flex-wrap: nowrap;
+  gap: 0.88rem;
+  justify-content: flex-end;
 }
 
 .nav__links a {
   display: block;
-  padding: 0.5rem 0.85rem;
+  padding: 0.45rem 0.95rem;
   color: var(--text-muted);
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 0.8125rem;
   border-radius: var(--radius-sm);
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .nav__links a:hover {
@@ -180,7 +201,7 @@ a:focus-visible {
 }
 
 .nav__cta {
-  margin-left: 0.5rem;
+  margin-left: 0.88rem;
   background: var(--red-dim) !important;
   color: var(--red) !important;
   border: 1px solid rgba(220, 38, 38, 0.45);
@@ -192,24 +213,39 @@ a:focus-visible {
 
 .hero {
   position: relative;
+  isolation: isolate;
   min-height: calc(100vh - var(--header-h));
   display: flex;
   align-items: center;
-  padding: 3rem 1.25rem 4rem;
+  /* Side gutters so absolute sidetext isn’t clipped or hidden under the portrait on wide displays */
+  padding: 3rem clamp(1rem, 3vw, 2rem) 4rem;
   overflow: hidden;
 }
 
-/* Black on left/center; red on the right third, inclined (~105deg) */
+@media (min-width: 900px) {
+  .hero {
+    padding-left: clamp(2.75rem, 7vw, 6.5rem);
+    padding-right: clamp(9rem, 18vw, 22rem);
+  }
+}
+
+@media (min-width: 1400px) {
+  .hero {
+    padding-right: clamp(12rem, 18vw, 24rem);
+  }
+}
+
+/* Black dominates left/center; slim red on right — split ~86.4% (~104deg) */
 .hero::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 0;
   background: linear-gradient(
-    105deg,
+    104deg,
     #000000 0%,
-    #000000 66.666%,
-    #dc2626 66.666%,
+    #000000 86.4%,
+    #dc2626 86.4%,
     #dc2626 100%
   );
   pointer-events: none;
@@ -217,54 +253,63 @@ a:focus-visible {
 
 .hero__sidetext {
   position: absolute;
-  z-index: 2;
+  /* Above hero__inner so labels aren’t covered by the portrait on large / external displays */
+  z-index: 4;
   margin: 0;
   pointer-events: none;
   opacity: 0.97;
 }
 
+/* Pinned — must not follow :root --red / --accent (rest of page uses updated tokens) */
 .hero__sidetext-change {
-  color: var(--red);
+  color: #dc2626;
 }
 
 .hero__sidetext-accent {
-  color: var(--accent);
+  color: #22d3ee;
 }
 
 /* Left: large vertical strip (bottom→top) — “It’s time to CHANGE” */
 .hero__sidetext--left {
-  left: clamp(0.15rem, 1.5vw, 1rem);
+  left: clamp(0.35rem, 1.25vw, 1.25rem);
   right: auto;
   top: 0;
   bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(3rem, min(14vw, 12vh), 8rem);
+  width: clamp(2.75rem, min(12vw, 10vh), 7rem);
 }
 
 .hero__sidetext--left .hero__sidetext-inner {
   display: inline-block;
+  position: relative;
+  /* Slight nudge up so the strip reads centered in the window (optical balance) */
+  top: clamp(-0.65rem, -2.25vh, -1.75rem);
   transform: rotate(-90deg);
   transform-origin: center center;
   white-space: nowrap;
   font-family: var(--font-mono);
-  font-size: clamp(1.25rem, min(7.5vmin, 10vh), 3.75rem);
+  /* Cap max size so long displays / Mac screens don’t overflow the gutter */
+  font-size: clamp(1.1rem, min(5.5vmin, 7vh), 2.85rem);
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.22em;
+  word-spacing: 0.35em;
   color: #ffffff;
   line-height: 1;
+  max-width: min(90vh, 100vw);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
-/* Right: full hero height, large type — top-to-bottom with left strip */
+/* Right: full hero height — sits in reserved padding; scales down on huge viewports */
 .hero__sidetext--right {
   left: auto;
-  right: clamp(0.15rem, 1.25vw, 1rem);
+  right: clamp(0.45rem, 1.65vw, 1.75rem);
   top: 0;
   bottom: 0;
   transform: none;
   width: auto;
-  max-width: min(58vw, 22rem);
+  max-width: min(42vw, 17rem);
   height: 100%;
   margin: 0;
   display: flex;
@@ -285,7 +330,7 @@ a:focus-visible {
   max-width: 100%;
   gap: clamp(0.5rem, 1.5vmin, 1rem);
   padding: clamp(1.25rem, 4.5vh, 3rem) 0 clamp(1.25rem, 4.5vh, 3rem)
-    clamp(1.55rem, 3.5vw, 2.75rem);
+    clamp(1.35rem, 3.15vw, 2.5rem);
   box-sizing: border-box;
 }
 
@@ -294,10 +339,10 @@ a:focus-visible {
   position: absolute;
   left: 0;
   top: clamp(0.75rem, 2.5vh, 1.5rem);
-  bottom: clamp(0.75rem, 2.5vh, 1.5rem);
+  bottom: 0;
   width: 6px;
   border-radius: 3px;
-  background: linear-gradient(180deg, var(--accent-strong) 0%, var(--red) 100%);
+  background: linear-gradient(180deg, #06b6d4 0%, #dc2626 100%);
   box-shadow: 0 0 28px rgba(34, 211, 238, 0.15);
 }
 
@@ -317,7 +362,7 @@ a:focus-visible {
   align-items: flex-end;
   justify-content: center;
   flex: 1 1 auto;
-  gap: clamp(1.15rem, min(4.5vmin, 6vh), 3rem);
+  gap: clamp(3.25rem, min(13.5vmin, 17vh), 8rem);
   min-height: 0;
 }
 
@@ -338,12 +383,13 @@ a:focus-visible {
 .hero__sidetext-stack-line {
   display: block;
   font-family: var(--font-mono);
-  font-size: clamp(1.85rem, min(8.5vmin, 11vh), 4.25rem);
+  font-size: clamp(1.35rem, min(6.5vmin, 8vh), 2.85rem);
   font-weight: 700;
   letter-spacing: 0.08em;
   color: #ffffff;
   line-height: 1.02;
   text-align: right;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 
 @media (max-width: 640px) {
@@ -369,7 +415,7 @@ a:focus-visible {
 
 .hero__inner {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   max-width: var(--max);
   margin: 0 auto;
   width: 100%;
@@ -502,13 +548,13 @@ a:focus-visible {
 }
 
 .hero__title-given {
-  color: #ffffff;
+  color: #f0f6fc;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .hero__title-family {
-  color: var(--red);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  color: var(--accent);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 28px rgba(79, 195, 247, 0.22);
 }
 
 .hero__role {
@@ -555,7 +601,7 @@ a:focus-visible {
   margin-bottom: var(--space-2);
   padding-left: 0.35rem;
   font-size: 0.98rem;
-  color: #c5d0e0;
+  color: var(--text-muted);
   line-height: 1.6;
 }
 
@@ -669,6 +715,10 @@ a:focus-visible {
   background: linear-gradient(90deg, var(--accent-strong), var(--red-strong));
 }
 
+#experience .section__title::after {
+  background: linear-gradient(90deg, var(--accent-strong), #0284c7);
+}
+
 .section__title--light {
   color: var(--text);
 }
@@ -759,11 +809,11 @@ a:focus-visible {
   font-family: var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--red);
+  color: var(--accent-strong);
   margin: 0 0 0.75rem;
   font-weight: 500;
   padding-left: 0.6rem;
-  border-left: 2px solid rgba(220, 38, 38, 0.75);
+  border-left: 2px solid rgba(14, 165, 233, 0.65);
 }
 
 .tag-list {
@@ -789,8 +839,8 @@ a:focus-visible {
 }
 
 .tag-list li:nth-child(even) {
-  border-color: rgba(220, 38, 38, 0.28);
-  background: rgba(220, 38, 38, 0.06);
+  border-color: rgba(14, 165, 233, 0.32);
+  background: rgba(14, 165, 233, 0.08);
   color: var(--text);
 }
 
@@ -808,7 +858,7 @@ a:focus-visible {
   top: 6px;
   bottom: 6px;
   width: 2px;
-  background: linear-gradient(to bottom, var(--accent-strong), var(--red-strong), transparent);
+  background: linear-gradient(to bottom, var(--accent-strong), #0284c7, transparent);
   border-radius: 1px;
   opacity: 0.55;
 }
@@ -834,7 +884,7 @@ a:focus-visible {
   border: 3px solid var(--accent-strong);
   box-shadow:
     0 0 0 4px var(--accent-dim),
-    0 0 14px rgba(220, 38, 38, 0.2);
+    0 0 14px rgba(14, 165, 233, 0.28);
 }
 
 .timeline__header {
@@ -861,7 +911,7 @@ a:focus-visible {
 
 .timeline__company {
   margin: 0;
-  color: var(--red);
+  color: var(--accent-strong);
   font-weight: 500;
   font-size: 0.95rem;
 }
@@ -897,7 +947,7 @@ a:focus-visible {
   color: var(--text-muted);
   background: var(--bg-card);
   border-radius: var(--radius-sm);
-  border-left: 3px solid var(--red-strong);
+  border-left: 3px solid var(--accent-strong);
 }
 
 .featured-projects {
@@ -1012,6 +1062,16 @@ a:focus-visible {
   margin-bottom: 0;
 }
 
+#contact .section__title,
+#contact .section__title--light {
+  color: var(--contact-body-text);
+}
+
+#contact .section__lede,
+#contact .contact__note {
+  color: var(--contact-body-muted);
+}
+
 .contact__address {
   display: flex;
   flex-direction: column;
@@ -1028,7 +1088,7 @@ a:focus-visible {
 }
 
 .contact__link:hover {
-  color: #7dd3fc;
+  color: var(--accent);
 }
 
 .contact__note {
@@ -1054,7 +1114,7 @@ a:focus-visible {
 }
 
 #contact .social .social__link:hover {
-  color: #7dd3fc;
+  color: var(--accent);
 }
 
 .footer {
@@ -1108,9 +1168,25 @@ a:focus-visible {
   }
 }
 
+/* Narrow desktop: keep bar edge-to-edge without crowding links */
+@media (max-width: 1024px) and (min-width: 721px) {
+  .nav__links {
+    gap: 0.5rem;
+  }
+
+  .nav__links a {
+    padding: 0.42rem 0.68rem;
+    font-size: 0.78rem;
+  }
+}
+
 @media (max-width: 720px) {
   .nav__toggle {
     display: flex;
+  }
+
+  .nav__end {
+    flex: 0 0 auto;
   }
 
   .nav__links {
@@ -1144,6 +1220,7 @@ a:focus-visible {
 
   .nav__links a {
     padding: 0.85rem 0.5rem;
+    white-space: normal;
   }
 
   .nav__cta {
